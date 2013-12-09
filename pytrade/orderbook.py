@@ -1,6 +1,7 @@
 import heapq
 
-from order import BUY, SELL
+from order import BUY
+from order import SELL
 
 
 class OrderBook(object):
