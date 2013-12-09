@@ -1,4 +1,3 @@
-from decimal import Decimal as D
 import uuid
 
 import factory
@@ -10,6 +9,6 @@ class OrderFactory(factory.Factory):
     FACTORY_FOR = order.Order
 
     type = order.BUY
-    amount = D(100)
-    value = D(10000)
+    amount = 100
+    value = 10000
     user = uuid.uuid4()
