@@ -42,6 +42,13 @@ class Order(object):
         else:
             return self.value < other.value
 
+    def __eq__(self, other):
+        return (self.id == other.id and
+                self.type == other.type and
+                self.amount == other.amount and
+                self.value == other.value and
+                self.user == other.user)
+
     def __repr__(self):
         return "Order<%s>(%s, %s, %s, %s)" % (
             self.id, self.type, self.amount, self.value, self.user)
