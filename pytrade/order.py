@@ -50,5 +50,5 @@ class Order(object):
                 self.user == other.user)
 
     def __repr__(self):
-        return "Order<%s>(%s, %s, %s, %s)" % (
+        return "Order<%s>(%s, %s, $%s, %s)" % (
             self.id, self.type, self.amount, self.value, self.user)
