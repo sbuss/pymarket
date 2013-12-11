@@ -1,26 +1,24 @@
 import logging
 from multiprocessing import Process
+from multiprocessing import Queue
+from multiprocessing.managers import BaseManager
 
-from market_server import MarketManager
 from order import BUY
 from order import SELL
 from orderbook import PriorityOrderBook
 
 
 logger = logging.getLogger('pytrade.market')
+logger.addHandler(logging.StreamHandler())
+logger.setLevel(logging.INFO)
 
 
 class Market(Process):
-    def __init__(self, buy_book, sell_book):
+    def __init__(self, buy_book, sell_book, order_queue):
         self.buy_book = buy_book
         self.sell_book = sell_book
+        self.order_queue = order_queue
         super(Market, self).__init__()
-
-    def connect_to_order_queue(self):
-        self.manager = MarketManager(address=('localhost', 5555),
-                                     authkey='pymarket')
-        self.manager.connect()
-        self.order_queue = self.manager.get_order_queue()
 
     def add_orders_to_books(self):
         while not self.order_queue.empty():
@@ -37,7 +35,6 @@ class Market(Process):
 
     def run(self):
         """Match open Buys with Sells."""
-        self.connect_to_order_queue()
         logger.info("Market open for business")
         logger.info(self.order_queue)
         logger.info(self.order_queue.empty())
@@ -69,6 +66,20 @@ class Market(Process):
                                 top_buy.amount, top_sell.value,
                                 top_buy.amount * top_sell.value)
 
+
+class MarketManager(BaseManager):
+    pass
+
+
+order_queue = Queue()
+MarketManager.register('get_order_queue', lambda: order_queue)
+
+
 if __name__ == "__main__":
-    market = Market(PriorityOrderBook(BUY), PriorityOrderBook(SELL))
+    logger.info("Starting server")
+    market = Market(PriorityOrderBook(BUY), PriorityOrderBook(SELL),
+                    order_queue)
     market.start()
+    manager = MarketManager(address=('localhost', 5555), authkey='pytrade')
+    server = manager.get_server()
+    server.serve_forever()
