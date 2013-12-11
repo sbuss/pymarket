@@ -1,20 +1,52 @@
 import logging
+from multiprocessing import Process
+
+from market_server import MarketManager
+from order import BUY
+from order import SELL
+from orderbook import PriorityOrderBook
+
 
 logger = logging.getLogger('pytrade.market')
-logger.addHandler(logging.StreamHandler())
-logger.setLevel(logging.INFO)
 
 
-class Market(object):
+class Market(Process):
     def __init__(self, buy_book, sell_book):
         self.buy_book = buy_book
         self.sell_book = sell_book
+        super(Market, self).__init__()
 
-    def match(self):
+    def connect_to_order_queue(self):
+        self.manager = MarketManager(address=('localhost', 5555),
+                                     authkey='pymarket')
+        self.manager.connect()
+        self.order_queue = self.manager.get_order_queue()
+
+    def add_orders_to_books(self):
+        while not self.order_queue.empty():
+            try:
+                order = self.order_queue.get_nowait()
+            except:
+                return
+            else:
+                logger.info("Received %s" % order)
+                if order.type == BUY:
+                    self.buy_book.add(order)
+                elif order.type == SELL:
+                    self.sell_book.add(order)
+
+    def run(self):
         """Match open Buys with Sells."""
+        self.connect_to_order_queue()
+        logger.info("Market open for business")
+        logger.info(self.order_queue)
+        logger.info(self.order_queue.empty())
         while True:
+            self.add_orders_to_books()
             top_buy = self.buy_book.peek()
             top_sell = self.sell_book.peek()
+            if not (top_buy and top_sell):
+                continue
             if top_buy.value >= top_sell.value:
                 logger.info("Top buy: %s" % top_buy)
                 logger.info("Top sell: %s" % top_sell)
@@ -22,14 +54,21 @@ class Market(object):
                 top_sell = self.sell_book.pop()
                 if top_buy.amount > top_sell.amount:
                     top_buy.amount -= top_sell.amount
-                    self.buy_book.add(top_buy)
-                    logger.info("Bought %s for $%s",
-                                top_sell.amount, top_sell.value)
+                    self.order_queue.put(top_buy)
+                    logger.info("Bought %s at $%s for $%s",
+                                top_sell.amount, top_sell.value,
+                                top_sell.amount * top_sell.value)
                 elif top_buy.amount < top_sell.amount:
                     top_sell.amount -= top_buy.amount
-                    self.sell_book.add(top_sell)
-                    logger.info("Bought %s for $%s",
-                                top_buy.amount, top_sell.value)
+                    self.order_queue.put(top_sell)
+                    logger.info("Bought %s at $%s for $%s",
+                                top_buy.amount, top_sell.value,
+                                top_buy.amount * top_sell.value)
                 else:
-                    logger.info("Bought %s for $%s",
-                                top_buy.amount, top_sell.value)
+                    logger.info("Bought %s at $%s for $%s",
+                                top_buy.amount, top_sell.value,
+                                top_buy.amount * top_sell.value)
+
+if __name__ == "__main__":
+    market = Market(PriorityOrderBook(BUY), PriorityOrderBook(SELL))
+    market.start()
