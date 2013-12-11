@@ -35,6 +35,9 @@ class OrderBook(object):
     def _cancel(self, order):
         raise NotImplementedError()
 
+    def has_orders(self):
+        raise NotImplementedError()
+
     def add(self, order):
         """Add an Order to the order book."""
         if order.type != self.type:
@@ -49,11 +52,15 @@ class OrderBook(object):
         price, for Sell order books, the top Order is the one with the lowest
         offer price.
         """
-        return self._pop()
+        if self.has_orders():
+            return self._pop()
+        return None
 
     def peek(self):
         """View the current top Order in the order book."""
-        return self._peek()
+        if self.has_orders():
+            return self._peek()
+        return None
 
     def cancel(self, order_id):
         """Cancel the given Order.
@@ -89,6 +96,9 @@ class ListOrderBook(OrderBook):
             if order.id == order_id:
                 del self.orders[i]
                 return
+
+    def has_orders(self):
+        return len(self.orders) > 0
 
 
 class PriorityOrderBook(ListOrderBook):
