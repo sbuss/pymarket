@@ -2,6 +2,7 @@ import logging
 from multiprocessing import Process
 from multiprocessing import Queue
 from multiprocessing.managers import BaseManager
+from Queue import Empty
 
 from order import BUY
 from order import SELL
@@ -24,7 +25,7 @@ class Market(Process):
         while not self.order_queue.empty():
             try:
                 order = self.order_queue.get_nowait()
-            except:
+            except Empty:
                 return
             else:
                 logger.info("Received %s" % order)
