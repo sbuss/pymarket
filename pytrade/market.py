@@ -7,6 +7,7 @@ from Queue import Empty
 from order import BUY
 from order import SELL
 from orderbook import PriorityOrderBook
+from utils import format_int_value
 
 
 logger = logging.getLogger('pytrade.market')
@@ -40,32 +41,35 @@ class Market(Process):
         logger.info(self.order_queue)
         logger.info(self.order_queue.empty())
         while True:
-            self.add_orders_to_books()
-            top_buy = self.buy_book.peek()
-            top_sell = self.sell_book.peek()
-            if not (top_buy and top_sell):
-                continue
-            if top_buy.value >= top_sell.value:
-                logger.info("Top buy: %s" % top_buy)
-                logger.info("Top sell: %s" % top_sell)
-                top_buy = self.buy_book.pop()
-                top_sell = self.sell_book.pop()
-                if top_buy.amount > top_sell.amount:
-                    top_buy.amount -= top_sell.amount
-                    self.order_queue.put(top_buy)
-                    logger.info("Bought %s at $%s for $%s",
-                                top_sell.amount, top_sell.value,
-                                top_sell.amount * top_sell.value)
-                elif top_buy.amount < top_sell.amount:
-                    top_sell.amount -= top_buy.amount
-                    self.order_queue.put(top_sell)
-                    logger.info("Bought %s at $%s for $%s",
-                                top_buy.amount, top_sell.value,
-                                top_buy.amount * top_sell.value)
-                else:
-                    logger.info("Bought %s at $%s for $%s",
-                                top_buy.amount, top_sell.value,
-                                top_buy.amount * top_sell.value)
+            self.add_orders_to_books()  # First flush the order queue
+            self.match_orders()
+
+    def match_orders(self):
+        info_msg = "Bought {quantity} at ${purchase_price} for ${total}"
+        top_buy = self.buy_book.peek()
+        top_sell = self.sell_book.peek()
+        if not (top_buy and top_sell):
+            return
+
+        if top_buy.value >= top_sell.value:
+            logger.info("Top buy: %s" % top_buy)
+            logger.info("Top sell: %s" % top_sell)
+            top_buy = self.buy_book.pop()
+            top_sell = self.sell_book.pop()
+
+            purchase_price = top_sell.value
+            quantity = top_sell.amount
+            if top_buy.amount > top_sell.amount:
+                top_buy.amount -= top_sell.amount
+                self.order_queue.put(top_buy)
+            elif top_buy.amount < top_sell.amount:
+                top_sell.amount -= top_buy.amount
+                self.order_queue.put(top_sell)
+                quantity = top_buy.amount
+            logger.info(info_msg.format(
+                quantity=quantity,
+                purchase_price=format_int_value(purchase_price),
+                total=format_int_value(quantity * purchase_price)))
 
 
 class MarketManager(BaseManager):
