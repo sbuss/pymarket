@@ -1,6 +1,6 @@
-# PyTrade
+# PyMarket
 
-PyTrade is a simple stock market engine, allowing a single stock to be traded.
+PyMarket is a simple stock market engine, allowing a single stock to be traded.
 Only limit orders are currently supported; orders cannot be cancelled.
 
 
