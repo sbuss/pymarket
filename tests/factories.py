@@ -2,7 +2,7 @@ import uuid
 
 import factory
 
-from pytrade import order
+from pymarket import order
 
 
 class OrderFactory(factory.Factory):

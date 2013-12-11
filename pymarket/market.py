@@ -10,7 +10,7 @@ from orderbook import PriorityOrderBook
 from utils import format_int_value
 
 
-logger = logging.getLogger('pytrade.market')
+logger = logging.getLogger('pymarket.market')
 logger.addHandler(logging.StreamHandler())
 logger.setLevel(logging.INFO)
 
@@ -85,6 +85,6 @@ if __name__ == "__main__":
     market = Market(PriorityOrderBook(BUY), PriorityOrderBook(SELL),
                     order_queue)
     market.start()
-    manager = MarketManager(address=('localhost', 5555), authkey='pytrade')
+    manager = MarketManager(address=('localhost', 5555), authkey='pymarket')
     server = manager.get_server()
     server.serve_forever()

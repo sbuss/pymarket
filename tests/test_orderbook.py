@@ -1,10 +1,10 @@
 import unittest
 
-from pytrade.order import BUY
-from pytrade.order import SELL
-from pytrade.orderbook import ListOrderBook
-from pytrade.orderbook import OrderBook
-from pytrade.orderbook import PriorityOrderBook
+from pymarket.order import BUY
+from pymarket.order import SELL
+from pymarket.orderbook import ListOrderBook
+from pymarket.orderbook import OrderBook
+from pymarket.orderbook import PriorityOrderBook
 from tests.factories import OrderFactory
 
 

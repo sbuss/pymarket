@@ -1,8 +1,8 @@
 import unittest
 
-from pytrade.order import BUY
-from pytrade.order import Order
-from pytrade.order import SELL
+from pymarket.order import BUY
+from pymarket.order import Order
+from pymarket.order import SELL
 from tests.factories import OrderFactory
 
 
