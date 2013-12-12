@@ -7,7 +7,7 @@ Only limit orders are currently supported; orders cannot be cancelled.
 # Running
 
 ```python
-python pymarket/market.py
+python -m pymarket.market
 ```
 
 This runs the market as a server which you can connect to. In order to send

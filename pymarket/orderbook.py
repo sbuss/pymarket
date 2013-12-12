@@ -1,8 +1,8 @@
 import heapq
 import logging
 
-from order import BUY
-from order import SELL
+from pymarket.order import BUY
+from pymarket.order import SELL
 
 
 logger = logging.getLogger('pymarket.market')

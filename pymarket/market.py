@@ -4,11 +4,11 @@ from multiprocessing import Queue
 from multiprocessing.managers import BaseManager
 from Queue import Empty
 
-from order import BUY
-from order import SELL
-from order import CancelOrder
-from orderbook import PriorityOrderBook
-from utils import format_int_value
+from pymarket.order import BUY
+from pymarket.order import SELL
+from pymarket.order import CancelOrder
+from pymarket.orderbook import PriorityOrderBook
+from pymarket.utils import format_int_value
 
 
 logger = logging.getLogger('pymarket.market')
