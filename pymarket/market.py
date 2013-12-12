@@ -6,6 +6,7 @@ from Queue import Empty
 
 from order import BUY
 from order import SELL
+from order import CancelOrder
 from orderbook import PriorityOrderBook
 from utils import format_int_value
 
@@ -29,11 +30,16 @@ class Market(Process):
             except Empty:
                 return
             else:
-                logger.info("Received %s" % order)
-                if order.type == BUY:
-                    self.buy_book.add(order)
-                elif order.type == SELL:
-                    self.sell_book.add(order)
+                if isinstance(order, CancelOrder):
+                    logger.info("Cancelling %s" % order.order_id)
+                    self.buy_book.cancel(order.order_id)
+                    self.sell_book.cancel(order.order_id)
+                else:
+                    logger.info("Received %s" % order)
+                    if order.type == BUY:
+                        self.buy_book.add(order)
+                    elif order.type == SELL:
+                        self.sell_book.add(order)
 
     def run(self):
         """Match open Buys with Sells."""

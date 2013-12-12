@@ -1,3 +1,4 @@
+from collections import namedtuple
 import uuid
 
 BUY = 'buy'
@@ -52,3 +53,7 @@ class Order(object):
     def __repr__(self):
         return "Order<%s>(%s, %s, $%s, %s)" % (
             self.id, self.type, self.amount, self.value, self.user)
+
+
+CancelOrder = namedtuple('CancelOrder', [
+    'order_id'])

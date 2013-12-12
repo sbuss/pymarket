@@ -1,7 +1,11 @@
 import heapq
+import logging
 
 from order import BUY
 from order import SELL
+
+
+logger = logging.getLogger('pymarket.market')
 
 
 class OrderBook(object):
@@ -94,6 +98,7 @@ class ListOrderBook(OrderBook):
     def _cancel(self, order_id):
         for i, order in enumerate(self.orders):
             if order.id == order_id:
+                logger.info("Cancelled %s" % order)
                 del self.orders[i]
                 return
 
